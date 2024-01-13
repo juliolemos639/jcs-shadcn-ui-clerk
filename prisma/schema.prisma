@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -18,4 +19,39 @@ model User {
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
+}
+
+model Property {
+  id Int @id @default(autoincrement())
+  userId String
+  typeProperty String
+  typeDeal String
+  title String @db.Text
+  description String
+  coverImage String
+  image String
+  state String
+  county String
+  neighborhood String
+  address String
+  bedrooms String
+  bathrooms String
+  surface String
+  price String
+  locationDescription String
+  gym Boolean @default(false)
+  spa Boolean @default(false)
+  bar Boolean @default(false)
+  laundry Boolean @default(false)
+  restaurant Boolean @default(false)
+  shopping Boolean @default(false)
+  freeParking Boolean @default(false)
+  bikeRental Boolean @default(false)
+  freeWifi Boolean @default(false)
+  swimmingPool Boolean @default(false)
+  coffeShop Boolean @default(false)
+  internetRoom Boolean @default(false)
+  authorId String
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt  
 }
