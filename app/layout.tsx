@@ -5,6 +5,7 @@ import { ptBR } from "@clerk/localizations";
 import "./globals.css";
 import NavBar from "@/components/layout/NavBar";
 import { ThemeProvider } from "@/components/theme-provider";
+import Container from "@/components/Container";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -29,7 +30,9 @@ export default function RootLayout({
           >
             <main className="flex flex-col min-h-screen bg-secondary">
               <NavBar />
-              <section className="flex-grow">{children}</section>
+              <section className="flex-grow">
+                <Container>{children}</Container>
+              </section>
             </main>
           </ThemeProvider>
         </body>

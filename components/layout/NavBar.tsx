@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import Container from "../Container";
