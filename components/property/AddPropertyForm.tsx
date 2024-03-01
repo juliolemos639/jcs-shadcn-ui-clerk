@@ -1,6 +1,6 @@
 "use client";
 
-import { Property } from "@prisma/client";
+import { Property, Room } from "@prisma/client";
 
 import { useState } from "react";
 
@@ -33,44 +33,41 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { UploadButton } from "@/components/uploadthing";
 
+import { useSession } from "next-auth/react";
+
+interface AddPropertyFormProps {
+  property: PropertyWithRooms | null;
+}
+
+export type PropertyWithRooms = Property & {
+  rooms: Room[];
+};
+
 const formSchema = z.object({
-  typeProperty: z.string().min(3, { message: "Mínimo de 3 caracteres" }),
   typeDeal: z
     .string()
-    .min(4, { message: "Tipo de propriedade deve ter no mínimo 4 caracteres" }),
+    .min(4, { message: "Tipo de negócio deve ser informado" }),
+  typeProperty: z.string().min(3, { message: "Mínimo de 3 caracteres" }),
   title: z
     .string()
     .min(3, { message: "Título deve ter ao mínimo 3 caracteres" }),
   description: z
     .string()
-    .min(10, { message: "Descrição dever ter pelo menos dez caracteres" }),
-  coverImage: z.string().min(1, { message: "Foto da capa é obrigatória" }),
-  image: z
-    .string()
-    .min(1, { message: "Pelo menos alguma foto adicional é obrigatória" }),
-  state: z.string().min(2, { message: "Estado dever ter 2 caracteres" }),
-  county: z
-    .string()
-    .min(4, { message: "Município dever ter pelo menos 4 caracteres" }),
-  neighborhood: z
-    .string()
-    .min(4, { message: "Bairro dever ter pelo menos 4 caracteres" }),
-  address: z
-    .string()
-    .min(5, { message: "Descrição dever ter pelo menos 5 caracteres" }),
-  bedrooms: z.string().min(1, {
-    message: "Quantidade de quartos dever ter pelo menos 1 caracter",
-  }),
-  bathrooms: z.string().min(1, {
-    message: "Quantidade de banheiros dever ter pelo menos 1 caracter",
-  }),
-  surface: z.string().min(1, {
-    message: "Metragem da propriedade dever ter pelo menos 1 caracter",
-  }),
-  price: z
-    .string()
-    .min(4, { message: "Valor dever ter pelo menos 4 caracter" }),
-  locationDescription: z.string().optional(),
+    .min(4, { message: "Descrição dever ter pelo menos quatro caracteres" }),
+  // state: z.string().min(2, { message: "Estado dever ter 2 caracteres" }),
+  // city: z
+  //   .string()
+  //   .min(4, { message: "Município dever ter pelo menos 4 caracteres" }),
+  // neighborhood: z
+  //   .string()
+  //   .min(4, { message: "Bairro dever ter pelo menos 4 caracteres" }),
+  // address: z
+  //   .string()
+  //   .min(5, { message: "Descrição dever ter pelo menos 5 caracteres" }),
+  bedrooms: z.coerce.number().min(1, { message: "campo obrigatório" }),
+  bathrooms: z.coerce.number().min(1, { message: "campo obrigatório" }),
+  surface: z.coerce.number().min(1, { message: "campo obrigatório" }),
+  rentalValue: z.coerce.number().min(1, { message: "campo obrigatório" }),
   gym: z.boolean().optional(),
   spa: z.boolean().optional(),
   bar: z.boolean().optional(),
@@ -86,27 +83,24 @@ const formSchema = z.object({
 });
 
 const AddPropertyForm = ({ property }: any) => {
-  const [coverImage, setCoverImage] = useState<string | undefined>(
-    property?.coverImage
-  );
+  // const [image, setImage] = useState<string | undefined>(property?.image);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      typeDeal: "",
       typeProperty: "",
       title: "",
       description: "",
-      coverImage: "",
-      state: "",
-      county: "",
-      neighborhood: "",
-      address: "",
-      bedrooms: "",
-      bathrooms: "",
-      surface: "",
-      price: "",
-      locationDescription: "",
+      // state: "",
+      // city: "",
+      // neighborhood: "",
+      // address: "",
+      bedrooms: 0,
+      bathrooms: 0,
+      surface: 0,
+      rentalValue: 0,
       gym: false,
       spa: false,
       bar: false,
@@ -126,8 +120,12 @@ const AddPropertyForm = ({ property }: any) => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log(values);
+    console.log("valores -> ", values);
   }
+
+  const { data } = useSession();
+
+  // if (!data?.user?.email) return <div>Não autorizado...</div>;
 
   return (
     <div>
@@ -138,24 +136,9 @@ const AddPropertyForm = ({ property }: any) => {
           </h3>
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 flex flex-col gap-6">
-              {/* <FormField
-                control={form.control}
-                name="typeProperty"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Imóvel</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Casa/Apartamento/Loja" {...field} />
-                    </FormControl>
-                    <FormDescription>Informe o tipo de imóvel.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
               <FormField
                 control={form.control}
-                name="typeProperty"
+                name="typeDeal"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Aluguel/Venda/Ambos</FormLabel>
@@ -257,7 +240,7 @@ const AddPropertyForm = ({ property }: any) => {
                     <FormItem>
                       <FormLabel>Qtd Quartos</FormLabel>
                       <FormControl>
-                        <Input placeholder="99" {...field} />
+                        <Input type="number" min={0} max={8} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -271,7 +254,7 @@ const AddPropertyForm = ({ property }: any) => {
                     <FormItem>
                       <FormLabel>Qtd Banheiros</FormLabel>
                       <FormControl>
-                        <Input placeholder="99" {...field} />
+                        <Input type="number" min={0} max={8} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -285,7 +268,7 @@ const AddPropertyForm = ({ property }: any) => {
                     <FormItem>
                       <FormLabel>Metragem</FormLabel>
                       <FormControl>
-                        <Input placeholder="9999" {...field} />
+                        <Input type="number" min={0} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -294,12 +277,12 @@ const AddPropertyForm = ({ property }: any) => {
 
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="rentalValue"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Valor</FormLabel>
                       <FormControl>
-                        <Input placeholder="99999" {...field} />
+                        <Input type="number" min={0} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -328,6 +311,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="spa"
@@ -343,6 +327,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="bar"
@@ -358,6 +343,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="laundry"
@@ -373,6 +359,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="restaurant"
@@ -388,6 +375,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="shopping"
@@ -403,6 +391,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="freeParking"
@@ -418,6 +407,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="bikeRental"
@@ -433,6 +423,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="freeWifi"
@@ -444,10 +435,11 @@ const AddPropertyForm = ({ property }: any) => {
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel>Wifi Gratuito</FormLabel>
+                        <FormLabel>Wi-Fi Gratuito</FormLabel>
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="swimmingPool"
@@ -463,6 +455,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="coffeShop"
@@ -478,6 +471,7 @@ const AddPropertyForm = ({ property }: any) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="internetRoom"
@@ -495,42 +489,9 @@ const AddPropertyForm = ({ property }: any) => {
                   />
                 </div>
               </div>
-              {/* <FormField
-              control={form.control}
-              name='coverImage'
-              render={({field})=> (
-                <FormItem className="flex flex-col space-y-3">
-                  <FormLabel>Imagem de Capa</FormLabel>
-                  <FormDescription>Escolha uma foto que melhor represente o imóvel</FormDescription>
-                  <FormControl>
-  {
-    coverImage ? <></> 
-    : 
-    <>
-    <div className="flex flex-col items-center max-w-[400px] p-12 border-2 border-dashed border-primary/50">
-    <UploadButton
-        endpoint="imageUploader"
-        onClientUploadComplete={(res) => {
-          // Do something with the response
-          console.log("Files: ", res);
-          alert("Upload Completed");
-        }}
-        onUploadError={(error: Error) => {
-          // Do something with the error.
-          alert(`ERROR! ${error.message}`);
-        }}
-        />
-        </div>
-    </>
-  }
-</FormControl>
-                </FormItem>
-              )}
-              /> */}
             </div>
             <div className="flex-1 flex flex-col gap-6">parte 2</div>
           </div>
-
           <Button type="submit">Submit</Button>
         </form>
       </Form>

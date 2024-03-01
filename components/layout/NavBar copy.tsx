@@ -7,9 +7,8 @@ import SearchInput from "../Searchinput";
 import { ModeToggle } from "../theme-toggle";
 import { useSession, signOut } from "next-auth/react";
 import { AccessMenu } from "./AccessMenu";
-import { LogOutIcon, MenuIcon } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import NavMenu from "./NavMenu";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 
 const NavBar = () => {
   const router = useRouter();
@@ -38,18 +37,39 @@ const NavBar = () => {
           <div className="flex gap-3 items-center">
             <div>
               <ModeToggle />
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <MenuIcon size={16} />
-                  </Button>
-                </SheetTrigger>
-
-                <SheetContent className="p-0">
-                  <NavMenu />
-                </SheetContent>
-              </Sheet>
+              <NavMenu />
             </div>
+
+            {!data?.user?.email && (
+              // <>
+              //   <Button
+              //     onClick={() => router.push("/signin")}
+              //     variant="outline"
+              //     size="sm"
+              //   >
+              //     Sign in
+              //   </Button>
+              //   <Button
+              //     onClick={() => router.push("/signup")}
+              //     variant="destructive"
+              //     size="sm"
+              //   >
+              //     Sign up
+              //   </Button>
+              // </>
+              <AccessMenu />
+            )}
+
+            {data?.user?.email && (
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="sm"
+                className="gap-1"
+              >
+                <LogOutIcon size={15} /> Sair
+              </Button>
+            )}
           </div>
         </div>
       </Container>

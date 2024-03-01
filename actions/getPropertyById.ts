@@ -1,10 +1,13 @@
-import prisma from "@/lib/prisma";
+import prismadb from "@/lib/prismadb";
 
 export const getPropertyById = async (propertyId: string) => {
   try {
-    const property = await prisma.property.findUnique({
+    const property = await prismadb.property.findUnique({
       where: {
-        id: parseInt(propertyId),
+        id: propertyId,
+      },
+      include: {
+        rooms: true,
       },
     });
 

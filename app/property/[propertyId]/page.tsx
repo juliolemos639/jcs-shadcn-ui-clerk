@@ -1,6 +1,6 @@
 import { getPropertyById } from "@/actions/getPropertyById";
+import { auth } from "@/app/firebase";
 import AddPropertyForm from "@/components/property/AddPropertyForm";
-import { auth } from "@clerk/nextjs";
 
 interface PropertyPageProps {
   params: {
@@ -10,11 +10,11 @@ interface PropertyPageProps {
 
 const Property = async ({ params }: PropertyPageProps) => {
   const property = await getPropertyById(params.propertyId);
-  const { userId } = auth();
+  // const {userId} = auth()
 
-  if (!userId) return <div>Não autorizado...</div>;
+  // if (!userId) return <div>Não autorizado...</div>;
 
-  if (property && property.userId !== userId) <div>Acesso Negado</div>;
+  // if (property && property.userId !== userId) <div>Acesso Negado</div>;
 
   return (
     <div>
